@@ -17,6 +17,8 @@
 #include "Limelight.h"
 #include "opus_multistream.h"
 
+extern float moonshineStreamVolume;
+
 @implementation Connection {
     SERVER_INFORMATION _serverInfo;
     STREAM_CONFIGURATION _streamConfig;
@@ -279,6 +281,15 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
             SDL_Delay(1);
         }
         
+        // Apply Moonshine stream volume (scales PCM samples in-place)
+        if (moonshineStreamVolume < 1.0f) {
+            short *samples = (short *)audioBuffer;
+            int count = decodeLen * audioConfig.channelCount;
+            for (int i = 0; i < count; i++) {
+                samples[i] = (short)(samples[i] * moonshineStreamVolume);
+            }
+        }
+
         if (SDL_QueueAudio(audioDevice,
                            audioBuffer,
                            sizeof(short) * decodeLen * audioConfig.channelCount) < 0) {
