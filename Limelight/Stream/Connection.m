@@ -47,6 +47,9 @@ static int audioFrameSize;
 
 static VideoDecoderRenderer* renderer;
 
+static MoonshineFrameTapCallback _frameTapCallback = NULL;
+void MoonshineSetFrameTapCallback(MoonshineFrameTapCallback cb) { _frameTapCallback = cb; }
+
 int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void* context, int drFlags)
 {
     [renderer setupWithVideoFormat:videoFormat width:width height:height frameRate:redrawRate];
@@ -165,6 +168,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     while (entry != NULL) {
         // Submit parameter set NALUs directly since no copy is required by the decoder
         if (entry->bufferType != BUFFER_TYPE_PICDATA) {
+            if (_frameTapCallback) {
+                _frameTapCallback((const unsigned char*)entry->data, entry->length, entry->bufferType, decodeUnit->frameType);
+            }
             ret = [renderer submitDecodeBuffer:(unsigned char*)entry->data
                                         length:entry->length
                                     bufferType:entry->bufferType
@@ -180,6 +186,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
         }
 
         entry = entry->next;
+    }
+
+    if (_frameTapCallback) {
+        _frameTapCallback(data, offset, BUFFER_TYPE_PICDATA, decodeUnit->frameType);
     }
 
     // This function will take our picture data buffer

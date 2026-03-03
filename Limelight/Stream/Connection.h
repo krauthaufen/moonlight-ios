@@ -32,3 +32,7 @@ typedef struct {
 -(NSString*) getActiveCodecName;
 
 @end
+
+// Moonshine frame tap — called for each encoded NAL unit before decode
+typedef void (*MoonshineFrameTapCallback)(const unsigned char *data, int length, int bufferType, int frameType);
+void MoonshineSetFrameTapCallback(MoonshineFrameTapCallback callback);
