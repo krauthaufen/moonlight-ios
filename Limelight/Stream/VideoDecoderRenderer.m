@@ -130,9 +130,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             // Battery saver, accessibility settings, or device thermals can cause the actual
             // refresh rate of the display to drop below the physical maximum.
             if (displayRefreshRate >= frameRate * 0.9f) {
-                // Keep one pending frame to smooth out gaps due to
-                // network jitter at the cost of 1 frame of latency
-                if (LiGetPendingVideoFrames() == 1) {
+                // Keep up to 2 pending frames to smooth out gaps due to
+                // network jitter at the cost of up to 2 frames of latency
+                if (LiGetPendingVideoFrames() <= 2) {
                     break;
                 }
             }
