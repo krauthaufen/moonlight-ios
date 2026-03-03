@@ -160,6 +160,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     
     currentVideoStats.receivedFrames++;
     currentVideoStats.totalFrames++;
+    currentVideoStats.totalBytes += decodeUnit->fullLength;
 
     PLENTRY entry = decodeUnit->bufferList;
     while (entry != NULL) {
