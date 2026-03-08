@@ -514,7 +514,14 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         free(data);
         return DR_NEED_IDR;
     }
-    
+
+    // Skip decoding while app is backgrounded (Moonshine power saving)
+    extern bool moonshineVideoDecodePaused;
+    if (moonshineVideoDecodePaused) {
+        free(data);
+        return DR_OK;
+    }
+
     // Check for previous decoder errors before doing anything
     if (displayLayer.status == AVQueuedSampleBufferRenderingStatusFailed) {
         Log(LOG_E, @"Display layer rendering failed: %@", displayLayer.error);
