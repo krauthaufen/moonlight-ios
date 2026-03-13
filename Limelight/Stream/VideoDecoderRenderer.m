@@ -120,7 +120,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         _displayLink.preferredFramesPerSecond = self->frameRate;
     }
 #else
-    _displayLink = [[CADisplayLink alloc] initWithTarget:self selector:@selector(displayLinkCallback:)];
+    _displayLink = [_view displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
     _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->frameRate, self->frameRate, self->frameRate);
 #endif
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
