@@ -12,9 +12,15 @@
 
 #include "Limelight.h"
 
+#if TARGET_OS_IPHONE
+typedef UIView MoonshineRenderView;
+#else
+typedef NSView MoonshineRenderView;
+#endif
+
 @interface VideoDecoderRenderer : NSObject
 
-- (id)initWithView:(UIView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing;
+- (id)initWithView:(MoonshineRenderView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing;
 
 - (void)setupWithVideoFormat:(int)videoFormat width:(int)videoWidth height:(int)videoHeight frameRate:(int)frameRate;
 - (void)start;

@@ -7,20 +7,26 @@
 //
 
 #import "VideoDecoderRenderer.h"
+#if TARGET_OS_IPHONE
 #import "StreamView.h"
+#endif
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/mem.h>
+
+// AV1 CBS support requires private FFmpeg headers (only available in custom iOS build)
+#if TARGET_OS_IPHONE
 #include <libavcodec/cbs.h>
 #include <libavcodec/cbs_av1.h>
 #include <libavformat/avio.h>
-#include <libavutil/mem.h>
 
 // Private libavformat API for writing the AV1 Codec Configuration Box
 extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
                               int write_seq_header);
+#endif
 
 @implementation VideoDecoderRenderer {
-    StreamView* _view;
+    MoonshineRenderView* _view;
     id<ConnectionCallbacks> _callbacks;
     float _streamAspectRatio;
     
@@ -42,7 +48,11 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     CALayer *oldLayer = displayLayer;
     
     displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
+#if TARGET_OS_IPHONE
     displayLayer.backgroundColor = [UIColor blackColor].CGColor;
+#else
+    displayLayer.backgroundColor = NSColor.blackColor.CGColor;
+#endif
     
     // Ensure the AVSampleBufferDisplayLayer is sized to preserve the aspect ratio
     // of the video stream. We used to use AVLayerVideoGravityResizeAspect, but that
@@ -77,7 +87,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     }
 }
 
-- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing
+- (id)initWithView:(MoonshineRenderView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing
 {
     self = [super init];
     
@@ -182,6 +192,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
 }
 
+#if TARGET_OS_IPHONE
 - (NSData*)getAv1CodecConfigurationBox:(NSData*)frameData  {
     AVIOContext* ioctx = NULL;
     int err;
@@ -400,6 +411,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     ff_cbs_close(&cbsCtx);
     return formatDesc;
 }
+#endif // TARGET_OS_IPHONE (AV1 CBS support)
 
 // This function must free data for bufferType == BUFFER_TYPE_PICDATA
 - (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType decodeUnit:(PDECODE_UNIT)du
@@ -497,12 +509,14 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             // Free parameter set buffers after submission
             [parameterSetBuffers removeAllObjects];
         }
+#if TARGET_OS_IPHONE
         else if (videoFormat & VIDEO_FORMAT_MASK_AV1) {
             NSData* fullFrameData = [NSData dataWithBytesNoCopy:data length:length freeWhenDone:NO];
-            
+
             Log(LOG_I, @"Constructing new AV1 format description");
             formatDesc = [self createAV1FormatDescriptionForIDRFrame:fullFrameData];
         }
+#endif
         else {
             // Unsupported codec!
             abort();

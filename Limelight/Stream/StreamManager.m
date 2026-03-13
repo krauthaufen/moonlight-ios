@@ -11,7 +11,9 @@
 #import "HttpManager.h"
 #import "Utils.h"
 
+#if TARGET_OS_IPHONE
 #import "StreamView.h"
+#endif
 #import "ServerInfoResponse.h"
 #import "HttpResponse.h"
 #import "HttpRequest.h"
@@ -22,12 +24,12 @@
 @implementation StreamManager {
     StreamConfiguration* _config;
 
-    UIView* _renderView;
+    MoonshineRenderView* _renderView;
     id<ConnectionCallbacks> _callbacks;
     Connection* _connection;
 }
 
-- (id) initWithConfig:(StreamConfiguration*)config renderView:(UIView*)view connectionCallbacks:(id<ConnectionCallbacks>)callbacks {
+- (id) initWithConfig:(StreamConfiguration*)config renderView:(MoonshineRenderView*)view connectionCallbacks:(id<ConnectionCallbacks>)callbacks {
     self = [super init];
     _config = config;
     _renderView = view;

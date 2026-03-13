@@ -8,10 +8,11 @@
 
 #import "StreamConfiguration.h"
 #import "Connection.h"
+#import "VideoDecoderRenderer.h"
 
 @interface StreamManager : NSOperation
 
-- (id) initWithConfig:(StreamConfiguration*)config renderView:(UIView*)view connectionCallbacks:(id<ConnectionCallbacks>)callback;
+- (id) initWithConfig:(StreamConfiguration*)config renderView:(MoonshineRenderView*)view connectionCallbacks:(id<ConnectionCallbacks>)callback;
 
 - (void) stopStream;
 
