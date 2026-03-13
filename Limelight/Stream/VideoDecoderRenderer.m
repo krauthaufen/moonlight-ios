@@ -111,6 +111,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 
 - (void)start
 {
+#if TARGET_OS_IPHONE
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
     if (@available(iOS 15.0, tvOS 15.0, *)) {
         _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->frameRate, self->frameRate, self->frameRate);
@@ -118,6 +119,10 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     else {
         _displayLink.preferredFramesPerSecond = self->frameRate;
     }
+#else
+    _displayLink = [[CADisplayLink alloc] initWithTarget:self selector:@selector(displayLinkCallback:)];
+    _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->frameRate, self->frameRate, self->frameRate);
+#endif
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
