@@ -7,7 +7,9 @@
 //
 
 #import "TemporarySettings.h"
+#if TARGET_OS_IPHONE
 #import "OnScreenControls.h"
+#endif
 
 @implementation TemporarySettings
 
