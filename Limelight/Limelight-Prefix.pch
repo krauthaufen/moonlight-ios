@@ -17,6 +17,7 @@
     #import <UIKit/UIKit.h>
 #elif TARGET_OS_MAC
     #import <AppKit/AppKit.h>
+    #import "MacCompat.h"
 #endif
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
