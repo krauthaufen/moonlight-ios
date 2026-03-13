@@ -6,7 +6,9 @@
 //  Copyright (c) 2014 Moonlight Stream. All rights reserved.
 //
 
+#if TARGET_OS_IPHONE
 #import "AppDelegate.h"
+#endif
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
 #import "TemporarySettings.h"

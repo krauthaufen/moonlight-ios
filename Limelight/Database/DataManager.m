@@ -12,12 +12,15 @@
 
 @implementation DataManager {
     NSManagedObjectContext *_managedObjectContext;
+#if TARGET_OS_IPHONE
     AppDelegate *_appDelegate;
+#endif
 }
 
 - (id) init {
     self = [super init];
-    
+
+#if TARGET_OS_IPHONE
     // HACK: Avoid calling [UIApplication delegate] off the UI thread to keep
     // Main Thread Checker happy.
     if ([NSThread isMainThread]) {
@@ -28,10 +31,11 @@
             self->_appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
         });
     }
-    
+
     _managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     [_managedObjectContext setParentContext:[_appDelegate managedObjectContext]];
-    
+#endif
+
     return self;
 }
 
@@ -187,7 +191,9 @@
         Log(LOG_E, @"Unable to save hosts to database: %@", error);
     }
 
+#if TARGET_OS_IPHONE
     [_appDelegate saveContext];
+#endif
 }
 
 - (NSArray*) getHosts {
