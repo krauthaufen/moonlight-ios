@@ -18,6 +18,14 @@ typedef UIView MoonshineRenderView;
 typedef NSView MoonshineRenderView;
 #endif
 
+// Moonshine: fan out decoded sample buffers to an optional second consumer
+// (the native magnifier loupe). The sink is invoked on the decode thread for
+// every frame, immediately after the frame is enqueued into the display layer.
+// isKeyFrame is YES for IDR frames — the loupe runs its own decoder and must
+// start from a keyframe.
+typedef void (^MoonshineFrameSink)(CMSampleBufferRef _Nonnull sampleBuffer, BOOL isKeyFrame);
+void MoonshineSetFrameSink(MoonshineFrameSink _Nullable sink);
+
 @interface VideoDecoderRenderer : NSObject
 
 - (id)initWithView:(MoonshineRenderView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing;

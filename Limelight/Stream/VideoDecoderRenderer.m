@@ -25,6 +25,12 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
                               int write_seq_header);
 #endif
 
+// Moonshine: optional fan-out of decoded frames to the magnifier loupe.
+static MoonshineFrameSink _moonshineFrameSink = nil;
+void MoonshineSetFrameSink(MoonshineFrameSink sink) {
+    _moonshineFrameSink = [sink copy];
+}
+
 @implementation VideoDecoderRenderer {
     MoonshineRenderView* _view;
     id<ConnectionCallbacks> _callbacks;
@@ -622,7 +628,14 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
     // Enqueue the next frame
     [self->displayLayer enqueueSampleBuffer:sampleBuffer];
-    
+
+    // Moonshine: fan the same buffer out to the magnifier loupe (if active).
+    // Done before the CFRelease below so the buffer is still valid; the sink
+    // retains it as needed.
+    if (_moonshineFrameSink != nil) {
+        _moonshineFrameSink(sampleBuffer, du->frameType == FRAME_TYPE_IDR);
+    }
+
     if (du->frameType == FRAME_TYPE_IDR) {
         // Ensure the layer is visible now
         self->displayLayer.hidden = NO;
