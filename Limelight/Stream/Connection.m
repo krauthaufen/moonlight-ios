@@ -11,6 +11,11 @@
 
 #import <VideoToolbox/VideoToolbox.h>
 
+// Moonshine: signalled once LiStopConnection() has fully reset moonlight-common-c's
+// global state, so the app can release the background-task assertion that keeps
+// iOS from suspending us mid-teardown. Implemented app-side (SDLSetup.m).
+extern void moonshineConnectionTeardownComplete(void);
+
 #define SDL_MAIN_HANDLED
 #import <SDL.h>
 
@@ -376,10 +381,19 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     // We dispatch this async to get out because this can be invoked
     // on a thread inside common and we don't want to deadlock. It also avoids
     // blocking on the caller's thread waiting to acquire initLock.
+    //
+    // Moonshine: LiStopConnection() resets moonlight-common-c's *global* state.
+    // If the app is suspended before this block finishes, that state stays dirty
+    // and every later LiStartConnection() fails until the process restarts. The
+    // caller holds a background-task assertion to give this time to run; these
+    // logs tell us whether it actually completed.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        Log(LOG_I, @"MOONSHINE-CONN: LiStopConnection starting");
         [initLock lock];
         LiStopConnection();
         [initLock unlock];
+        Log(LOG_I, @"MOONSHINE-CONN: LiStopConnection done");
+        moonshineConnectionTeardownComplete();
     });
 }
 
